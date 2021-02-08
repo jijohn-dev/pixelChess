@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<head>
+	<title>Chess</title>
+	<link rel="stylesheet" href="/css/styles.css">
+</head>
+<body>
+	<div class="main container">
+		<canvas id="gameCanvas" width="800" height="800"></canvas>
+	
+		<div class="chat">			
+			<div class="chat__main">
+				<div id="messages" class="chat__messages"></div>
+
+				<div class="compose">
+					<form id="message-form">
+						<input name="message" placeholder="Message" required autocomplete="off">
+						<button>Send</button>
+					</form>				
+				</div>
+			</div>
+		</div>
+	</div>	
+    
+	<!-- <script src="https://cdnjs.cloudflare.com/ajax/libs/qs/6.6.0/qs.min.js"></script> -->
+    <script src="/socket.io/socket.io.js"></script>
+    <script src="/bundle.js"></script>   
+</body>
