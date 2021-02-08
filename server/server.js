@@ -4,10 +4,10 @@ const path = require('path')
 const socketio = require('socket.io')
 const { v4: uuidv4 } = require('uuid')
 
-const { legalMove, checkmate, initializePieces, parseMove, makeMove } = require('../modules/chess/chess')
+const Chess = require('../modules/chessJS/Chess')
 
 const app = express()
-const publicDirectoryPath = path.join(__dirname, '../public')
+const publicDirectoryPath = path.join(__dirname, '../client/public')
 app.use(express.static(publicDirectoryPath))
 
 const server = http.createServer(app)
@@ -69,30 +69,22 @@ io.on('connection', (socket) => {
 		const game = games.find(g => g.id === user.room)
 		if (!game) {
 			console.log(`game not found: ${user.room}`)
-		}
-
-		// parse move notation
-		const { pieceX, pieceY, targetX, targetY } = parseMove(move)		
-		
-		// get piece
-		const piece = game.pieces.find(p => p.boardX === pieceX && p.boardY === pieceY)				
+		}						
 
 		// validate move
-		const legal = legalMove(game.pieces, piece, targetX, targetY)
+		const legal = game.state.legal(move)		
 		if (!legal) {
 			console.log('illegal move')
 			socket.emit('illegalMove', move)
 		}
 		else {
 			// update game state
-			game.pieces = makeMove(game.pieces, move)
-			// detect checkmate or stalemate
-			const king = game.pieces.find(p => p.name === 'king' && p.color !== game.toMove)
-			if (checkmate(game.pieces, king)) {
+			game.state.play(move)
+			// detect checkmate or stalemate			
+			if (game.state.checkmate) {
 				console.log('checkmate')
-				socket.emit('message', `${game.toMove} won by checkmate`)
-			}
-			game.toMove = changeToMove(game.toMove)			
+				socket.emit('message', `${game.state.toMove} won by checkmate`)
+			}						
 
 			// send move to other client
 			socket.broadcast.to(user.room).emit('move', move)
@@ -125,7 +117,7 @@ const createGame = ({ id, username, color }) => {
 		id: user.room,
 		white: undefined,
 		black: undefined,
-		pieces: [],
+		state: new Chess(),
 		status: 'active'
 	}
 	if (color === 'white') {
@@ -134,9 +126,6 @@ const createGame = ({ id, username, color }) => {
 	if (color === 'black') {
 		game.black = username
 	}
-	
-	// initialize pieces
-	initializePieces(game.pieces)
 
 	games.push(game)
 

@@ -4,11 +4,14 @@ import { $messages } from './chat'
 import { handleMouseDown, handleMouseUp, handleMouseMove } from './userInput'
 import { initializePieces, saveState, drawBoard, drawPieces, changeToMove } from './util'
 
-const { checkmate, makeMove } = require('../modules/chess/chess')
+const { Chess, makeMove, checkmate } = require('../../modules/chessJS/Chess')
 
 const qs = require('qs')
 
 const query = qs.parse(location.search, { ignoreQueryPrefix: true })
+
+// Chess instance
+const game = new Chess()
 
 // join game
 if (query.gameId) {    
@@ -68,6 +71,7 @@ socket.on('joined', gameInfo => {
 })
 
 const startGame = () => {
+    const game = new Chess()
     initializePieces()
     saveState()
 

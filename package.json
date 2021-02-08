@@ -2,9 +2,11 @@
   "name": "pixelchess",
   "version": "1.0.0",
   "description": "",
-  "main": "/server/server.js",
+  "main": "./server/server.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "start": "node ./server/server.js",
+    "dev-server": "nodemon ./server/server.js",
+    "build": "webpack"
   },
   "author": "",
   "license": "ISC",
@@ -17,6 +19,7 @@
     "@babel/core": "^7.12.13",
     "@babel/preset-env": "^7.12.13",
     "babel-loader": "^8.2.2",
-    "webpack": "^5.21.2"
+    "webpack": "^5.21.2",
+    "webpack-cli": "^4.5.0"
   }
 }

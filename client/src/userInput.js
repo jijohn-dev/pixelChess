@@ -8,7 +8,7 @@ import {
     changeToMove 
 } from './util'
 
-const { legalMove, makeMove } = require('../modules/chess/chess')
+const { legalMove, makeMove } = require('../../modules/chessJS/chess')
 
 function handleMouseDown(e) {   
     // get state vars
