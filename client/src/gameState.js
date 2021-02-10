@@ -10,13 +10,7 @@ const size = 100
 // Chess instance
 let game = new Chess()
 
-// pieces array
-let pieces = []
-let history = []
-let lastMove = "start"
-
-let toMove = "white"
-
+// client color
 let color
 
 // click and drag logic    
@@ -31,10 +25,7 @@ export const state = {
 	ctx,
 	size,
 	sprites,
-	pieces,
-	lastMove,
-	history,
-	toMove,
+	game,
 	color,
 	selected,
 	pieceIdx,

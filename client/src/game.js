@@ -10,9 +10,6 @@ const qs = require('qs')
 
 const query = qs.parse(location.search, { ignoreQueryPrefix: true })
 
-// Chess instance
-const game = new Chess()
-
 // join game
 if (query.gameId) {    
     const { username, gameId } = query
@@ -70,11 +67,7 @@ socket.on('joined', gameInfo => {
     startGame()
 })
 
-const startGame = () => {
-    const game = new Chess()
-    initializePieces()
-    saveState()
-
+const startGame = () => {   
     state.canvas = document.getElementById('gameCanvas')
     state.ctx = state.canvas.getContext('2d')
 
@@ -108,17 +101,14 @@ socket.on('move', move => {
     console.log(`${move} received from server`)
 
     // update state
-    state.pieces = makeMove(state.pieces, move)
-    changeToMove()
+    state.game.play(move)    
     
-    // save and redraw
-    saveState()    
+    // redraw        
     drawBoard()
     drawPieces()
 
-    // detect checkmate
-    const king = state.pieces.find(p => p.name === "king" && p.color === state.color)
-    if (checkmate(state.pieces, king)) {
+    // detect checkmate    
+    if (state.game.checkmate) {
         alert("checkmate")        
     }
 })

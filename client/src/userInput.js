@@ -12,7 +12,7 @@ const { legalMove, makeMove } = require('../../modules/chessJS/Chess')
 
 function handleMouseDown(e) {   
     // get state vars
-    let pieces = state.pieces
+    let pieces = state.game.pieces
 
     // get mouse coords
     let mouseX = e.offsetX
@@ -93,7 +93,7 @@ function handleMouseUp(e) {
             notation += idxToSquare(squareX, squareY)         
 
             // check if move is legal
-            legal = legalMove(state.pieces, notation, state.lastMove)
+            legal = chess.legal(notation)
             if (!legal) {
                 console.log("illegal move")
                 console.log(state.pieces)
@@ -116,8 +116,7 @@ function handleMouseUp(e) {
 
         // update and redraw                          
         if (moveMade) {
-            state.pieces = makeMove(state.pieces, notation)
-            saveState()
+            state.game.play(notation)            
             changeToMove()                                
             console.log(notation)
             // send move to server            
