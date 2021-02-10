@@ -16,7 +16,7 @@ const game = new Chess()
 // join game
 if (query.gameId) {    
     const { username, gameId } = query
-    socket.emit('join', { username, gameId }, (error) => {
+    socket.emit('join', { username, gameId }, error => {
         if (error) {
             alert(error)
             location.href = '/'

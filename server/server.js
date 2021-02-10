@@ -4,7 +4,7 @@ const path = require('path')
 const socketio = require('socket.io')
 const { v4: uuidv4 } = require('uuid')
 
-const Chess = require('../modules/chessJS/Chess')
+const { Chess } = require('../modules/chessJS/Chess')
 
 const app = express()
 const publicDirectoryPath = path.join(__dirname, '../client/public')

@@ -38,16 +38,12 @@ const isBlocked = (pieces, color, x, y) => {
     return blocked
 }
 
-const createPiece = (pieces, color, name, spriteX, spriteY, boardX, boardY) => {
+const createPiece = (pieces, color, name, boardX, boardY) => {
     pieces.push({
         color,
-        name,
-        spriteX,
-        spriteY,
+        name,        
         boardX,
-        boardY,
-        offsetX: 0,
-        offsetY: 0,
+        boardY,        
         hasMoved: false,
         delete: false 
     })
@@ -57,35 +53,55 @@ const createPiece = (pieces, color, name, spriteX, spriteY, boardX, boardY) => {
 const initializePieces = pieces => {
     // pawns
     for (let i = 0; i < 8; i++) {
-        createPiece(pieces, "white", "pawn", 0, 0, i, 6)
-        createPiece(pieces, "black", "pawn", 0, 1, i, 1)
+        createPiece(pieces, "white", "pawn", i, 6)
+        createPiece(pieces, "black", "pawn", i, 1)
     }
 
     // bishops
-    createPiece(pieces, "white", "bishop", 1, 0, 2, 7)
-    createPiece(pieces, "white", "bishop", 1, 0, 5, 7)
-    createPiece(pieces, "black", "bishop", 1, 1, 2, 0)
-    createPiece(pieces, "black", "bishop", 1, 1, 5, 0)
+    createPiece(pieces, "white", "bishop", 2, 7)
+    createPiece(pieces, "white", "bishop", 5, 7)
+    createPiece(pieces, "black", "bishop", 2, 0)
+    createPiece(pieces, "black", "bishop", 5, 0)
 
     // knights
-    createPiece(pieces, "white", "knight", 2, 0, 1, 7)
-    createPiece(pieces, "white", "knight", 2, 0, 6, 7)
-    createPiece(pieces, "black", "knight", 2, 1, 1, 0)
-    createPiece(pieces, "black", "knight", 2, 1, 6, 0)
+    createPiece(pieces, "white", "knight", 1, 7)
+    createPiece(pieces, "white", "knight", 6, 7)
+    createPiece(pieces, "black", "knight", 1, 0)
+    createPiece(pieces, "black", "knight", 6, 0)
 
     // rooks
-    createPiece(pieces, "white", "rook", 3, 0, 0, 7)
-    createPiece(pieces, "white", "rook", 3, 0, 7, 7)
-    createPiece(pieces, "black", "rook", 3, 1, 0, 0)
-    createPiece(pieces, "black", "rook", 3, 1, 7, 0)
+    createPiece(pieces, "white", "rook", 0, 7)
+    createPiece(pieces, "white", "rook", 7, 7)
+    createPiece(pieces, "black", "rook", 0, 0)
+    createPiece(pieces, "black", "rook", 7, 0)
 
     // kings
-    createPiece(pieces, "white", "king", 0, 2, 4, 7)
-    createPiece(pieces, "black", "king", 1, 2, 4, 0)
+    createPiece(pieces, "white", "king", 4, 7)
+    createPiece(pieces, "black", "king", 4, 0)
 
     // queens
-    createPiece(pieces, "white", "queen", 2, 2, 3, 7)
-    createPiece(pieces, "black", "queen", 3, 2, 3, 0)
+    createPiece(pieces, "white", "queen", 3, 7)
+    createPiece(pieces, "black", "queen", 3, 0)
+}
+
+const loadBoard = board => {
+    const pieces = []
+    board.forEach((square, index) => {        
+        if (square !== '_') {
+            const color = square === square.toUpperCase() ? "black" : "white"
+            createPiece(pieces, color, charToName(square), index % 8, Math.floor(index / 8))
+        }
+    })
+
+    return pieces
+}
+
+const charToName = char => {
+    const c = char.toLowerCase()
+    const chars = ['p', 'b', 'n', 'r', 'q', 'k']
+    const names = ["pawn", "bishop", "knight", "rook", "queen", "king"]
+    const idx = chars.indexOf(c)
+    return names[idx] 
 }
 
 module.exports = {
@@ -93,5 +109,7 @@ module.exports = {
     isOccupied,
     isBlocked,
 	parseMove,
-	initializePieces
+    initializePieces,
+    loadBoard,
+    charToName
 }

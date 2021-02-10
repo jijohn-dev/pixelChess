@@ -8,7 +8,7 @@ import {
     changeToMove 
 } from './util'
 
-const { legalMove, makeMove } = require('../../modules/chessJS/chess')
+const { legalMove, makeMove } = require('../../modules/chessJS/Chess')
 
 function handleMouseDown(e) {   
     // get state vars
@@ -93,7 +93,7 @@ function handleMouseUp(e) {
             notation += idxToSquare(squareX, squareY)         
 
             // check if move is legal
-            legal = legalMove(state.pieces, piece, squareX, squareY)
+            legal = legalMove(state.pieces, notation, state.lastMove)
             if (!legal) {
                 console.log("illegal move")
                 console.log(state.pieces)
