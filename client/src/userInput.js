@@ -1,16 +1,8 @@
 import { state } from './gameState'
 import { socket } from './connection'
-import { 
-    drawBoard, 
-    drawPieces, 
-    idxToSquare, 
-    saveState,
-    changeToMove 
-} from './util'
+import { drawBoard, drawPieces, idxToSquare } from './util'
 
-const { legalMove, makeMove } = require('../../modules/chessJS/Chess')
-
-function handleMouseDown(e) {   
+const handleMouseDown = e => {   
     // get state vars
     let pieces = state.game.pieces
 
@@ -46,14 +38,14 @@ function handleMouseDown(e) {
     })        
 }
 
-function handleMouseUp(e) {
+const handleMouseUp = e => {
     // get mouse coords
     let mouseX = e.offsetX
     let mouseY = e.offsetY        
 
     // drop piece
     if (state.selected) {           
-        let piece = state.pieces[state.pieceIdx]
+        let piece = state.game.pieces[state.pieceIdx]
         let startX = piece.boardX
         let startY = piece.boardY
 
@@ -83,7 +75,7 @@ function handleMouseUp(e) {
         let notation = ""
 
         // check color
-        if (piece.color !== state.toMove) {
+        if (piece.color !== state.game.toMove) {
             squareX = piece.boardX
             squareY = piece.boardY
         }
@@ -93,10 +85,10 @@ function handleMouseUp(e) {
             notation += idxToSquare(squareX, squareY)         
 
             // check if move is legal
-            legal = chess.legal(notation)
+            legal = state.game.legal(notation)
             if (!legal) {
                 console.log("illegal move")
-                console.log(state.pieces)
+                console.log(state.game.pieces)
                 moveMade = false
             }                 
         }
@@ -116,8 +108,7 @@ function handleMouseUp(e) {
 
         // update and redraw                          
         if (moveMade) {
-            state.game.play(notation)            
-            changeToMove()                                
+            state.game.play(notation)                                    
             console.log(notation)
             // send move to server            
             socket.emit("move", notation)
@@ -128,7 +119,7 @@ function handleMouseUp(e) {
     }
 }
 
-function handleMouseMove(e) {
+const handleMouseMove = e => {
     // get mouse coords
     let mouseX = e.offsetX
     let mouseY = e.offsetY       
@@ -142,8 +133,8 @@ function handleMouseMove(e) {
 
     // move piece
     if (state.selected) {
-        state.pieces[state.pieceIdx].offsetX += dx
-        state.pieces[state.pieceIdx].offsetY += dy
+        state.game.pieces[state.pieceIdx].offsetX += dx
+        state.game.pieces[state.pieceIdx].offsetY += dy
 
         // redraw
         drawBoard()

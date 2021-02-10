@@ -31,7 +31,7 @@ function drawPiece(x, y, i, j, dx, dy) {
 }
 
 const drawPieces = () => {    
-    const spriteLocations = ["pawn", "bishop", "knight", "rook", "queen", "king"]
+    const spriteLocations = ["pawn", "bishop", "knight", "rook", "king", "queen"]
   
     state.game.pieces.forEach((p) => { 
         const spriteX = spriteLocations.indexOf(p.name)
