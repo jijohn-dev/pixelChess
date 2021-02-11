@@ -21,7 +21,7 @@ input {
 }
 
 body {
-    line-height: 1.4;
+    line-height: 1.4;    
     color: #333333;
     font-family: 'Silkscreen', Helvetica, Arial, sans-serif;
 }
@@ -66,6 +66,7 @@ button:disabled {
 
 .centered-form {
     background: #333744;
+    background-image: url(../assets/img/background.png);
     width: 100vw;
     height: 100vh;   
     display: flex;

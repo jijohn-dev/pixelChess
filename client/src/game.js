@@ -76,7 +76,7 @@ const startGame = () => {
 
     // load spritesheet
     state.sprites = new Image()
-    state.sprites.src = 'assets/spritesheet.png'
+    state.sprites.src = 'assets/img/spritesheet.png'
     state.sprites.onload = () => {
         drawPieces()
     }     
