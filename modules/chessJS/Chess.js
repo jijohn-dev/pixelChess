@@ -64,9 +64,10 @@ class Chess {
 	}
 
 	// load board state from char array
-	load(board, toMove) {		
+	load(board, toMove, lastMove) {		
 		this.pieces = loadBoard(board)
 		this.toMove = toMove
+		this.lastMove = lastMove
 
 		// check for mate
 		const king = this.pieces.find(p => p.name === "king" && p.color !== this.toMove)
@@ -82,6 +83,5 @@ class Chess {
 
 module.exports = {
 	Chess,
-	makeMove,
-	legalMove
+	makeMove
 }

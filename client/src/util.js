@@ -42,14 +42,32 @@ const drawPieces = () => {
     })    
 }
 
-function idxToSquare(x, y) {
-    let file = String.fromCharCode(x + 97);
-    let rank = 8 - y;
-    return file + rank;
+const drawPromotionMenu = (color, x) => {
+    // reflect x position for black
+    if (color === "black") {
+        x = 7 - x
+    }
+
+    const spriteLocations = ["pawn", "bishop", "knight", "rook", "king", "queen"]
+    
+    state.ctx.fillstyle = "white"
+    state.ctx.fillRect(100 * x, 0, 100, 400)
+    const spriteY = color === "white" ? 0 : 1
+    drawPiece(spriteLocations.indexOf("queen"),  spriteY, x, 0)
+    drawPiece(spriteLocations.indexOf("rook"),   spriteY, x, 1)
+    drawPiece(spriteLocations.indexOf("knight"), spriteY, x, 2)
+    drawPiece(spriteLocations.indexOf("bishop"), spriteY, x, 3)
+}
+
+const idxToSquare = (x, y) => {
+    let file = String.fromCharCode(x + 97)
+    let rank = 8 - y
+    return file + rank
 }
 
 export {
     drawBoard,
     drawPieces,
+    drawPromotionMenu,
     idxToSquare
 }

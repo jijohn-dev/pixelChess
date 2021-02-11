@@ -1,5 +1,5 @@
 const { parseMove, initializePieces, charToName } = require('./utils')
-const { pathClear, kingInCheck, checkmate } = require('./attacking')
+const { pathClear, kingInCheck, checkmate, safeSquare } = require('./attacking')
 
 const makeMove = (pieces, move) => {
     // parse move notation
@@ -154,20 +154,24 @@ function canMove(pieces, piece, targetX, targetY, move, lastMove) {
                 )        
                 
                 if (targetPawn) {
-                    // was target pawn moved 2 squares on previous move?
-                    const { startX, startY, endX, endY } = parseMove(lastMove)
+                    // was target pawn moved 2 squares on previous move?                    
+                    const { pieceX: startX, pieceY: startY, targetX: endX, targetY: endY } = parseMove(lastMove)    
                     if (startX === targetX && 
                         startY === targetPawn.boardY + 2*step && 
                         endX === targetPawn.boardX &&
                         endY === targetPawn.boardY    
                     ) {
                         // move enemy pawn back 1 square to simulate normal capture
-                        if (enPassant && target) {
-                            target.boardY += step
-                            capture = true
-                        }
-                    }                    
-                }                            
+                        targetPawn.boardY += step
+                        capture = true                        
+                    }          
+                    else {
+                        console.log("enemy pawn did not move 2 squares on previous move")
+                    }          
+                }    
+                else {
+                    console.log("no enemy pawn on en passant square")
+                }                        
             }
             return capture
         }               
@@ -186,6 +190,7 @@ function canMove(pieces, piece, targetX, targetY, move, lastMove) {
             if (piece.color === piece.color && targetY === rookY) {
                 // cannot castle out of check                
                 if (kingInCheck(pieces, piece.boardX, piece.boardY)) {
+                    console.log("cannot castle out of check")
                     return false
                 }
 
@@ -194,7 +199,8 @@ function canMove(pieces, piece, targetX, targetY, move, lastMove) {
 
                 // short
                 if (targetX === 6) {
-                    if (kingInCheck(pieces, 5, rookY)) {
+                    if (!safeSquare(pieces, piece.color, 5, rookY)) {
+                        console.log("cannot castle through check")
                         return false
                     }
                     // move rook
@@ -209,7 +215,8 @@ function canMove(pieces, piece, targetX, targetY, move, lastMove) {
                 }
                 // long
                 if (targetX === 2) {
-                    if (kingInCheck(pieces, 3, rookY)) {
+                    if (!safeSquare(pieces, piece.color, 3, rookY)) {
+                        console.log("cannot castle through check")
                         return false
                     }
                     // move rook

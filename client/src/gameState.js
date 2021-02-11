@@ -20,6 +20,11 @@ let pieceIdx
 let lastX = 0
 let lastY = 0
 
+// promotion menu
+let promotionMenuOpen = false
+let menuX
+let promotionMove
+
 export const state = {
 	canvas,
 	ctx,
@@ -30,5 +35,8 @@ export const state = {
 	selected,
 	pieceIdx,
 	lastX,
-	lastY
+	lastY,
+	promotionMenuOpen,
+	menuX,
+	promotionMove
 }

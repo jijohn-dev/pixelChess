@@ -1,8 +1,13 @@
 import { state } from './gameState'
 import { socket } from './connection'
-import { drawBoard, drawPieces, idxToSquare } from './util'
+import { drawBoard, drawPieces, drawPromotionMenu, idxToSquare } from './util'
 
-const handleMouseDown = e => {   
+const handleMouseDown = e => {  
+    // disable click and drag if promoting 
+    if (state.promotionMenuOpen) {
+        return
+    }
+
     // get state vars
     let pieces = state.game.pieces
 
@@ -16,32 +21,76 @@ const handleMouseDown = e => {
 
     // reflect square for black
     if (state.color === "black") {
+        console.log("reflecting square")
         squareX = 7 - squareX
         squareY = 7 - squareY
     }
 
+    console.log(`clicked on square at: ${squareX} ${squareY}`)
+
     // check if square has a piece and is user's color       
     pieces.forEach((p, index) => {
-        if (p.boardX === squareX && p.boardY === squareY && p.color === state.color) {                
+        if (p.boardX === squareX && p.boardY === squareY && p.color === state.color) {  
+            console.log(`found piece at: ${squareX} ${squareY}`)              
             state.selected = true
             state.pieceIdx = index
+
             // center piece on cursor
+            let centerX = squareX
+            let centerY = squareY
             if (state.color === "black") {
-                squareX = -squareX + 7
-                squareY = -squareY + 7
+                centerX = -squareX + 7
+                centerY = -squareY + 7
             }
-            p.offsetX = e.offsetX - (squareX * 100 + 50)
-            p.offsetY = e.offsetY - (squareY * 100 + 50)
+            p.offsetX = e.offsetX - (centerX * 100 + 50)
+            p.offsetY = e.offsetY - (centerY * 100 + 50)
             drawBoard()
             drawPieces()
         }
     })        
+    const selectedPiece = pieces[state.pieceIdx]
+    console.log("selected piece:", selectedPiece)
 }
 
 const handleMouseUp = e => {
     // get mouse coords
     let mouseX = e.offsetX
-    let mouseY = e.offsetY        
+    let mouseY = e.offsetY    
+    
+    // get square
+    let squareX = Math.floor(mouseX / 100)
+    let squareY = Math.floor(mouseY / 100)
+
+    // promotion selection
+    if (state.promotionMenuOpen) {     
+        // reflect menu location for black
+        if (state.color === "black") {
+            state.menuX = 7 - state.menuX
+        }
+        if (squareX === state.menuX && mouseY < 400) {
+            const menuLocations = ['q', 'r', 'n', 'b']
+            state.promotionMove += '='
+            const move = state.promotionMove + menuLocations[squareY]
+            state.promotionMenuOpen = false
+
+            state.game.play(move)                                    
+            console.log(move)
+            // send move to server            
+            socket.emit("move", move)
+            drawBoard()
+            drawPieces()
+            return
+        }
+        else {
+            return
+        }
+    }
+
+    // reflect for black
+    if (state.color === "black") {
+        squareX = 7 - squareX
+        squareY = 7 - squareY
+    }
 
     // drop piece
     if (state.selected) {           
@@ -57,47 +106,46 @@ const handleMouseUp = e => {
             drawPieces()
             state.selected = false   
             return
-        }
-
-        // get square
-        let squareX = Math.floor(mouseX / 100)
-        let squareY = Math.floor(mouseY / 100)
-
-        // reflect for black
-        if (state.color === "black") {
-            squareX = 7 - squareX
-            squareY = 7 - squareY
-        }
+        }        
         
         let moveMade = false        
         let legal = false
 
-        let notation = ""
+        let move = ""
 
         // check color
-        if (piece.color !== state.game.toMove) {
-            squareX = piece.boardX
-            squareY = piece.boardY
-        }
-        else {                
+        if (piece.color === state.game.toMove) {               
             moveMade = true                                
-            notation += idxToSquare(startX, startY)   
-            notation += idxToSquare(squareX, squareY)         
+            move += idxToSquare(startX, startY)   
+            move += idxToSquare(squareX, squareY)     
 
             // check if move is legal
-            legal = state.game.legal(notation)
+            legal = state.game.legal(move)
             if (!legal) {
-                console.log("illegal move")
-                console.log(state.game.pieces)
+                console.log("illegal move", move)     
+                console.log(state.game.pieces)           
                 moveMade = false
-            }                 
-        }
-        
-        // reset piece if move is invalid
-        if (!legal) {            
-            squareX = piece.boardX
-            squareY = piece.boardY
-        }           
+            }   
+            else {
+                // promotion menu
+                if (piece.name === "pawn" && (squareY === 0 || squareY === 7)) {
+                    state.promotionMenuOpen = true
+                    state.menuX = squareX
+                    state.promotionMove = move
+                    // draw menu
+                    drawPromotionMenu(piece.color, squareX)
+
+                    // reset piece offset
+                    piece.offsetX = 0
+                    piece.offsetY = 0
+
+                    // deselect piece
+                    state.selected = false
+
+                    return
+                }
+            }              
+        }      
 
         // update piece        
         piece.hasMoved = moveMade
@@ -108,10 +156,10 @@ const handleMouseUp = e => {
 
         // update and redraw                          
         if (moveMade) {
-            state.game.play(notation)                                    
-            console.log(notation)
+            state.game.play(move)                                    
+            console.log(move)
             // send move to server            
-            socket.emit("move", notation)
+            socket.emit("move", move)
         }   
         
         drawBoard()
@@ -120,6 +168,11 @@ const handleMouseUp = e => {
 }
 
 const handleMouseMove = e => {
+    // do nothing if promotion menu is open
+    if (state.promotionMenuOpen) {
+        return
+    }
+
     // get mouse coords
     let mouseX = e.offsetX
     let mouseY = e.offsetY       

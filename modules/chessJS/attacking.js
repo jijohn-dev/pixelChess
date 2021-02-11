@@ -271,5 +271,6 @@ module.exports = {
     pathClear,
     kingInCheck,
     checkmate,
-    stalemate
+    stalemate,
+    safeSquare
 }
