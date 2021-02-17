@@ -159,11 +159,20 @@ const handleMouseUp = e => {
         state.selected = false        
 
         // update and redraw                          
-        if (moveMade) {
+        if (moveMade) {            
             state.game.play(move)                                    
             console.log(move)
+            
             // send move to server            
             socket.emit("move", move)
+            
+            // remove draw offer if present
+            const drawOffer = document.getElementById('draw-offer')
+            if (drawOffer) {
+                drawOffer.remove()
+                document.getElementById('yes').remove()
+                document.getElementById('no').remove()
+            }
         }   
         
         drawBoard()
@@ -173,7 +182,7 @@ const handleMouseUp = e => {
 
 const handleMouseMove = e => {
     if (state.status === 'inactive') return
-    
+
     // do nothing if promotion menu is open
     if (state.promotionMenuOpen) {
         return

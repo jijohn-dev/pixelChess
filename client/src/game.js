@@ -4,7 +4,7 @@ import { $messages } from './chat'
 import { handleMouseDown, handleMouseUp, handleMouseMove } from './userInput'
 import { drawBoard, drawPieces } from './util'
 
-const { Chess, makeMove, checkmate } = require('../../modules/chessJS/Chess')
+const { Chess } = require('../../modules/chessJS/Chess')
 
 const qs = require('qs')
 
@@ -94,19 +94,19 @@ const startGame = () => {
     
     // mouse move
     state.canvas.addEventListener('mousemove', handleMouseMove)
-
-    // resign button
-    document.getElementById('resign').addEventListener('click', () => {
-        socket.emit('resign')
-    })
-
-    // offer draw button
-    document.getElementById('offer-draw').addEventListener('click', () => {
-        const html = `You offer a draw`
-        $messages.insertAdjacentHTML('beforeend', html)
-        socket.emit('offer-draw')
-    })
 }
+
+// resign button
+document.getElementById('resign').addEventListener('click', () => {
+    socket.emit('resign')
+})
+
+// offer draw button
+document.getElementById('offer-draw').addEventListener('click', () => {
+    const html = `<p>You offer a draw<p>`
+    $messages.insertAdjacentHTML('beforeend', html)
+    socket.emit('offer-draw')
+})
 
 // listen for moves from the server
 socket.on('move', move => {
@@ -140,13 +140,19 @@ socket.on('resign', color => {
 
 // handle offer draw
 socket.on('offer-draw', color => {
-    let html = `<p>${color} offers a draw. Accept?</p>`
+    let html = `<p id="draw-offer">${color} offers a draw. Accept?</p>`
     html += '<button id="yes">Yes</button><button id="no">No</button>'
     $messages.insertAdjacentHTML('beforeend', html)
 
     // add event handlers to draw buttons
     document.getElementById('yes').addEventListener('click', () => {
         socket.emit('accept-draw')
+    })
+
+    document.getElementById('no').addEventListener('click', () => {
+        document.getElementById('draw-offer').remove()
+        document.getElementById('yes').remove()
+        document.getElementById('no').remove()
     })
 })
 
@@ -202,6 +208,8 @@ const endGame = () => {
     const html = '<button id="rematch">Rematch</button>'
     $messages.insertAdjacentHTML('beforeend', html)
     document.getElementById('rematch').addEventListener('click', () => {
+        const sentMsg = '<p>rematch requested</p>'
+        $messages.insertAdjacentHTML('beforeend', sentMsg)
         socket.emit('offer-rematch')
         document.getElementById('rematch').remove()
     })
