@@ -181,3 +181,7 @@ button:disabled {
 .radio {
     display: flex;
 }
+
+#username-form-box {
+    display: none;
+}

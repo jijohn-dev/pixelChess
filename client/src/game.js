@@ -12,12 +12,22 @@ const query = qs.parse(location.search, { ignoreQueryPrefix: true })
 
 // join game
 if (query.gameId) {    
-    const { username, gameId } = query
-    socket.emit('join', { username, gameId }, error => {
+    let username
+    // show username form
+    document.getElementById('username-form-box').style.display = "flex"
+    document.getElementById('username-form').addEventListener('submit', e => {
+        e.preventDefault()
+        // hide form 
+        document.getElementById('username-form-box').style.display = "none"        
+        username = e.target.elements.username.value    
+        
+        const gameId = query.gameId
+        socket.emit('join', { username, gameId }, error => {
         if (error) {
             alert(error)
             location.href = '/'
         }
+    })
     })
 }
 else {
