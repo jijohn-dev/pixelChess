@@ -140,6 +140,11 @@ button:disabled {
     color: #0070CC;
 }
 
+/* Actions Styles */
+.actions {
+    margin-left: 8px;
+}
+
 /* Message Composition Styles */
 
 .compose {
@@ -165,22 +170,6 @@ button:disabled {
 
 .compose button {
     font-size: 14px;
-}
-
-/* Chat Sidebar Styles */
-
-.room-title {
-    font-weight: 400;
-    font-size: 22px;
-    background: #2c2f3a;
-    padding: 24px;   
-}
-
-.list-title {
-    font-weight: 500;
-    font-size: 18px;
-    margin-bottom: 4px;
-    padding: 12px 24px 0 24px;
 }
 
 /* Flex */

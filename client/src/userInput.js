@@ -3,6 +3,8 @@ import { socket } from './connection'
 import { drawBoard, drawPieces, drawPromotionMenu, idxToSquare } from './util'
 
 const handleMouseDown = e => {  
+    if (state.status === 'inactive') return
+
     // disable click and drag if promoting 
     if (state.promotionMenuOpen) {
         return
@@ -53,6 +55,8 @@ const handleMouseDown = e => {
 }
 
 const handleMouseUp = e => {
+    if (state.status === 'inactive') return
+
     // get mouse coords
     let mouseX = e.offsetX
     let mouseY = e.offsetY    
@@ -168,6 +172,8 @@ const handleMouseUp = e => {
 }
 
 const handleMouseMove = e => {
+    if (state.status === 'inactive') return
+    
     // do nothing if promotion menu is open
     if (state.promotionMenuOpen) {
         return

@@ -9,6 +9,7 @@ const size = 100
 
 // Chess instance
 let game = new Chess()
+let status = 'active'
 
 // client color
 let color
@@ -31,6 +32,7 @@ export const state = {
 	size,
 	sprites,
 	game,
+	status,
 	color,
 	selected,
 	pieceIdx,

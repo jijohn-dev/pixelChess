@@ -2,7 +2,7 @@ import { state } from './gameState'
 import { socket } from './connection'
 import { $messages } from './chat'
 import { handleMouseDown, handleMouseUp, handleMouseMove } from './userInput'
-import { initializePieces, saveState, drawBoard, drawPieces, changeToMove } from './util'
+import { drawBoard, drawPieces } from './util'
 
 const { Chess, makeMove, checkmate } = require('../../modules/chessJS/Chess')
 
@@ -94,6 +94,18 @@ const startGame = () => {
     
     // mouse move
     state.canvas.addEventListener('mousemove', handleMouseMove)
+
+    // resign button
+    document.getElementById('resign').addEventListener('click', () => {
+        socket.emit('resign')
+    })
+
+    // offer draw button
+    document.getElementById('offer-draw').addEventListener('click', () => {
+        const html = `You offer a draw`
+        $messages.insertAdjacentHTML('beforeend', html)
+        socket.emit('offer-draw')
+    })
 }
 
 // listen for moves from the server
@@ -110,6 +122,7 @@ socket.on('move', move => {
     // detect checkmate    
     if (state.game.checkmate) {
         alert("checkmate")        
+        endGame()
     }
 })
 
@@ -117,3 +130,79 @@ socket.on('move', move => {
 socket.on('illegalMove', update => {
     alert(`Illegal move: ${update.notation}`)
 })
+
+// handle resignation from server
+socket.on('resign', color => {    
+    const html = `<p>${color} resigns</p>`
+    $messages.insertAdjacentHTML('beforeend', html)  
+    endGame()  
+})
+
+// handle offer draw
+socket.on('offer-draw', color => {
+    let html = `<p>${color} offers a draw. Accept?</p>`
+    html += '<button id="yes">Yes</button><button id="no">No</button>'
+    $messages.insertAdjacentHTML('beforeend', html)
+
+    // add event handlers to draw buttons
+    document.getElementById('yes').addEventListener('click', () => {
+        socket.emit('accept-draw')
+    })
+})
+
+// handle accept draw
+socket.on('accept-draw', () => {    
+    const html = '<p>Draw</p>'
+    $messages.insertAdjacentHTML('beforeend', html)
+    endGame()
+})
+
+// handle offer rematch
+socket.on('offer-rematch', () => {
+    // remove rematch button
+    document.getElementById('rematch').remove()
+
+    // accept rematch button
+    const html = `<p id="accept-text">Accept rematch?<p><button id="accept">Accept</button>`
+    $messages.insertAdjacentHTML('beforeend', html)
+    document.getElementById('accept').addEventListener('click', () => {
+        socket.emit('accept-rematch')
+        // remove accept button
+        document.getElementById('accept-text').remove()
+        document.getElementById('accept').remove()
+    })
+})
+
+// handle accept rematch
+socket.on('accept-rematch', () => {
+    // reset local game
+    state.game = new Chess()
+    state.status = 'active'
+    // swap color
+    if (state.color === 'white') {
+        state.color = 'black'
+    }
+    else {
+        state.color = 'white'
+    }
+
+    startGame()
+})
+
+const endGame = () => {
+    state.status = 'inactive'
+
+    // fade board
+    state.ctx.globalAlpha = 0.8
+    state.ctx.fillstyle = 'black'
+    state.ctx.fillRect(0, 0, 800, 800)
+    state.ctx.globalAlpha = 1.0
+
+    // add rematch button
+    const html = '<button id="rematch">Rematch</button>'
+    $messages.insertAdjacentHTML('beforeend', html)
+    document.getElementById('rematch').addEventListener('click', () => {
+        socket.emit('offer-rematch')
+        document.getElementById('rematch').remove()
+    })
+}

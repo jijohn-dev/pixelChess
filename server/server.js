@@ -91,6 +91,60 @@ io.on('connection', (socket) => {
 		}		
 	})
 
+	// resign
+	socket.on('resign', () => {
+		const user = getUser(socket.id)
+		// fetch game
+		const game = games.find(g => g.id === user.room)
+		game.status = 'inactive'
+		game.winner = user.color === 'white' ? 'black' : 'white'		
+
+		io.to(user.room).emit('resign', user.color)
+	})
+
+	// offer draw
+	socket.on('offer-draw', () => {
+		const user = getUser(socket.id)
+		socket.broadcast.to(user.room).emit('offer-draw', user.color)
+	})
+
+	// accept draw
+	socket.on('accept-draw', () => {
+		const user = getUser(socket.id)
+		const game = games.find(g => g.id === user.room)
+		game.status = 'inactive'
+		game.winner = 'draw'
+
+		io.to(user.room).emit('accept-draw')
+	})
+
+	// offer rematch
+	socket.on('offer-rematch', () => {
+		const user = getUser(socket.id)
+		socket.broadcast.to(user.room).emit('offer-rematch')
+	})
+
+	// accept rematch
+	socket.on('accept-rematch', () => {
+		const user = getUser(socket.id)
+		// reset game
+		const game = games.find(g => g.id === user.room)
+		game.state = new Chess()
+		game.status = 'active'
+		
+		// swap colors
+		if (user.color === 'white') {
+			game.white = game.black
+			game.black = user.username
+		} 
+		else {
+			game.black = game.white
+			game.white = user.username
+		}
+
+		io.to(user.room).emit('accept-rematch')
+	})
+
 	// chat messages
 	socket.on('sendMessage', (msg, callback) => {
 		const user = getUser(socket.id)
@@ -109,7 +163,7 @@ const createGame = ({ id, username, color }) => {
 	// generate game ID
 	const gameId = uuidv4()
 
-	const user = { id, username, room: gameId }
+	const user = { id, username, color, room: gameId }
 	users.push(user)
 
 	// create server game state
@@ -118,7 +172,8 @@ const createGame = ({ id, username, color }) => {
 		white: undefined,
 		black: undefined,
 		state: new Chess(),
-		status: 'active'
+		status: 'active',
+		winner: undefined
 	}
 	if (color === 'white') {
 		game.white = username
@@ -168,11 +223,4 @@ const joinGame = ({ id, username, gameId }) => {
 
 const getUser = id => {
 	return users.find(user => user.id === id)
-}
-
-const changeToMove = color => {
-	if (color === "white") {
-		return "black"
-	}
-	return "white"
 }
