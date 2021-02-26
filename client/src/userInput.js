@@ -167,8 +167,7 @@ const handleMouseUp = e => {
             }              
         }      
 
-        // update piece        
-        piece.hasMoved = moveMade
+        // update piece                
         piece.offsetX = 0
         piece.offsetY = 0
 
@@ -235,6 +234,7 @@ const handleMouseMove = e => {
 const execute = move => {
     state.game.play(move)                                    
     console.log(move)
+    console.log(state.game.pieces)
 
     // play sound    
     if (state.game.capture) {

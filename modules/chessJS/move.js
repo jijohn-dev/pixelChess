@@ -1,19 +1,25 @@
 const { parseMove, initializePieces, charToName } = require('./utils')
-const { pathClear, kingInCheck, checkmate, safeSquare } = require('./attacking')
+const { pathClear, kingInCheck, safeSquare } = require('./attacking')
 
 const makeMove = (pieces, move) => {
     // parse move notation
     const { pieceX, pieceY, targetX, targetY } = parseMove(move)    
 
     // castling
-    if (move === "e1g1" || move === "e8g8") {
-        const rook = pieces.find(p => p.boardX === 7 && p.name === "rook")
-        rook.boardX = 5        
-    }
-    if (move === "e1c1" || move === "e8c8") {
-        const rook = pieces.find(p => p.boardX === 0 && p.name === "rook")
-        rook.boardX = 3
-    }
+    // check if actually castling    
+    const king = pieces.find(p => p.name === 'king' && p.boardX === pieceX && p.boardY === pieceY)
+    if (king) {        
+        if (!king.hasMoved) {
+            if (move === "e1g1" || move === "e8g8") {
+                const rook = pieces.find(p => p.boardX === 7 && p.boardY === pieceY && p.name === "rook")                
+                rook.boardX = 5        
+            }
+            if (move === "e1c1" || move === "e8c8") {
+                const rook = pieces.find(p => p.boardX === 0 && p.boardY === pieceY && p.name === "rook")
+                rook.boardX = 3
+            }
+        }        
+    }    
 
     // get piece
     const piece = pieces.find(p => p.boardX === pieceX && p.boardY === pieceY)
@@ -76,7 +82,7 @@ const legalMove = (pieces, move, lastMove) => {
         return false
     }
 
-    let valid = canMove(pieces, piece, targetX, targetY, move, lastMove)
+    let valid = canMove(pieces, piece, targetX, targetY, lastMove)
     if (!valid) {
         return false
     }
@@ -128,7 +134,7 @@ const legalMove = (pieces, move, lastMove) => {
     return true
 }
 
-function canMove(pieces, piece, targetX, targetY, move, lastMove) {
+function canMove(pieces, piece, targetX, targetY, lastMove) {
     let diffX = Math.abs(targetX - piece.boardX)
     let diffY = Math.abs(targetY - piece.boardY)
 
@@ -184,7 +190,7 @@ function canMove(pieces, piece, targetX, targetY, move, lastMove) {
                         capture = true                        
                     }          
                     else {
-                        // console.log("enemy pawn did not move 2 squares on previous move")
+                        console.log("enemy pawn did not move 2 squares on previous move:" + lastMove)
                     }          
                 }    
                 else {
@@ -203,17 +209,28 @@ function canMove(pieces, piece, targetX, targetY, move, lastMove) {
         }
         // castling
         if (!piece.hasMoved) {              
-            let rookY = piece.color === "white" ? 7 : 0
+            const rookX = targetX === 6 ? 7 : 0
+            const rookY = piece.color === "white" ? 7 : 0
 
-            if (piece.color === piece.color && targetY === rookY) {
+            if (diffX === 2 && diffY === 0 && targetY === rookY) {
                 // cannot castle out of check                
                 if (kingInCheck(pieces, piece.boardX, piece.boardY)) {
                     console.log("cannot castle out of check")
                     return false
+                }           
+                
+                // check for rook
+                const rook = pieces.find(p => 
+                    p.name === "rook" && 
+                    p.color === piece.color &&
+                    p.boardX === rookX &&
+                    p.boardY === rookY &&
+                    !p.hasMoved    
+                )
+                
+                if (!rook) {
+                    return false
                 }
-
-                // TODO: cannot castle through check
-                // end square is handled in legalMove()
 
                 // short
                 if (targetX === 6) {
@@ -221,14 +238,6 @@ function canMove(pieces, piece, targetX, targetY, move, lastMove) {
                         console.log("cannot castle through check")
                         return false
                     }
-                    // move rook
-                    pieces.forEach(x => {
-                        if (x.name === "rook" && x.color === piece.color && x.boardX === 7) {
-                            if (x.hasMoved) {
-                                return false
-                            }                            
-                        }
-                    })
                     return true
                 }
                 // long
@@ -236,15 +245,7 @@ function canMove(pieces, piece, targetX, targetY, move, lastMove) {
                     if (!safeSquare(pieces, piece.color, 3, rookY)) {
                         console.log("cannot castle through check")
                         return false
-                    }
-                    // move rook
-                    pieces.forEach(x => {
-                        if (x.name === "rook" && x.color === piece.color && x.boardX === 0) {
-                            if (x.hasMoved) {                                
-                                return false
-                            }                                                        
-                        }
-                    })
+                    }                    
                     return true
                 }
             }
@@ -273,7 +274,6 @@ function canMove(pieces, piece, targetX, targetY, move, lastMove) {
 module.exports = {
     makeMove,
 	legalMove,
-    checkmate,    
     initializePieces,
     parseMove
 }

@@ -1,5 +1,5 @@
-const { checkmate, kingInCheck } = require("./attacking")
-const { stalemate } = require("./mate")
+const { kingInCheck } = require("./attacking")
+const { checkmate, stalemate } = require("./mate")
 const { legalMove, makeMove } = require("./move")
 const { initializePieces, loadBoard } = require("./utils")
 
@@ -89,10 +89,13 @@ class Chess {
 		this.lastMove = lastMove
 		this.stalemate = false
 		this.checkmate = false
+		this.capture = false
+		this.check = false
+		this.numPieces = this.pieces.length
 
 		// check for mate
 		const king = this.pieces.find(p => p.name === "king" && p.color === this.toMove)
-		if (checkmate(this.pieces, king)) {			
+		if (checkmate(this.pieces, king, lastMove)) {			
 			this.checkmate = true
 			this.winner = this.toMove
 		}

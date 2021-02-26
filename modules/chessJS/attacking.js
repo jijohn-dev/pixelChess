@@ -47,132 +47,6 @@ const isAttacking = (pieces, p, x, y) => {
     }
 }
 
-// is king checkmated?
-const checkmate = (pieces, king) => {    
-    // console.log('checkmate?')
-    if (kingInCheck(pieces, king.boardX, king.boardY)) {
-        // double check?
-        let count = 0
-        pieces.forEach(p => {
-            if (p.color !== king.color) {
-                if (isAttacking(pieces, p, king.boardX, king.boardY)) {
-                    // console.log(`${p.name} is attacking`)
-                    count++
-                }
-            }            
-        })
-
-        let canMove = kingCanMove(pieces, king.boardX, king.boardY)
-        if (canMove) {
-            // console.log("king can move out of check")
-            return false
-        }
-        else if (count > 1) {
-            // king must move if double check
-            // console.log("double check and king cannot move")
-            return true
-        }
-        else {
-            // block check or capture attacking piece            
-            // check if any piece is attacking a square on the path
-            // to the attacking piece (including the square attacking piece is on)
-            let canBlock = false
-            
-            // get attacker
-            const attacker = pieces.find(p => p.color !== king.color && isAttacking(pieces, p, king.boardX, king.boardY))
-            let canCapture = false 
-
-            // can attacker be captured?
-            pieces.forEach(p => {
-                if (p.color === king.color) {
-                    // console.log(`can ${p.name} at ${p.boardX} ${p.boardY} capture ${attacker.name} at ${attacker.boardX} ${attacker.boardY}?`)
-                    if (isAttacking(pieces, p, attacker.boardX, attacker.boardY)) {
-                        // need to check if piece can be moved
-                        let lastX = p.boardX
-                        let lastY = p.boardY
-                        p.boardX = attacker.boardX
-                        p.boardY = attacker.boardY
-    
-                        // remove attacker
-                        let oldColor = attacker.color
-                        attacker.color = king.color
-    
-                        if (!kingInCheck(pieces, king.boardX, king.boardY)) {
-                            // console.log('attacker can be captured')
-                            canCapture = true
-                        }
-    
-                        // reset pieces
-                        p.boardX = lastX
-                        p.boardY = lastY
-                        attacker.color = oldColor
-                    }
-                }                
-            })
-
-            // knight cannot be blocked, only captured
-            if (attacker.name !== "knight") {                
-                // can a piece move to a square on the path from attacker to king?
-                let diffX = Math.abs(king.boardX - attacker.boardX)
-                let diffY = Math.abs(king.boardY - attacker.boardY)
-
-                let x = attacker.boardX
-                let y = attacker.boardY
-
-                let steps
-                let stepX = 0
-                let stepY = 0
-
-                if (diffX != 0) {
-                    stepX = (king.boardX - x) / diffX
-                    steps = diffX
-                }
-            
-                if (diffY != 0) {
-                    stepY = (king.boardY - y) / diffY
-                    steps = diffY
-                }
-
-                for (let i = 1; i < steps; i++) {
-                    x += stepX
-                    y += stepY
-                    pieces.forEach(p => {
-                        if (p.color === king.color) {
-                            // console.log(`can ${p.name} block on ${x} ${y}?`)
-                        }
-                        
-                        if (p.color === king.color && isAttacking(pieces, p, x, y) && p.name !== 'king') {
-                            // need to check if piece can be moved
-                            let lastX = p.boardX
-                            let lastY = p.boardY
-                            p.boardX = x
-                            p.boardY = y
-
-                            if (!kingInCheck(pieces, king.boardX, king.boardY)) {
-                                // console.log('yes')
-                                canBlock = true
-                            }
-
-                            // reset piece
-                            p.boardX = lastX
-                            p.boardY = lastY
-                        }
-                    })
-                }
-            }
-
-            // console.log(`can move: ${canMove}`)
-            // console.log(`can block: ${canBlock}`)
-            // console.log(`can capture: ${canCapture}`)
-           
-            if (!canMove && !canBlock && !canCapture) {                
-                return true
-            }
-        }
-    }
-    return false
-}
-
 // does the king located at x, y have a legal move?
 const kingCanMove = (pieces, x, y) => {
 	// need color of king for safeSquare()
@@ -255,8 +129,8 @@ const pathClear = (pieces, x, y, targetX, targetY) => {
 
 module.exports = {
     pathClear,
+    isAttacking,
     kingInCheck,
     kingCanMove,
-    checkmate,
     safeSquare
 }
