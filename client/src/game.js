@@ -14,12 +14,19 @@ const query = qs.parse(location.search, { ignoreQueryPrefix: true })
 // join game
 if (query.gameId) {    
     let username
+    // hide game screen
+    document.getElementById('main').style.display = "none"
+    
     // show username form
     document.getElementById('username-form-box').style.display = "flex"
     document.getElementById('username-form').addEventListener('submit', e => {
         e.preventDefault()
         // hide form 
-        document.getElementById('username-form-box').style.display = "none"        
+        document.getElementById('username-form-box').style.display = "none"  
+       
+        // show game
+        document.getElementById('main').style.display = "flex"   
+
         username = e.target.elements.username.value    
         
         const gameId = query.gameId

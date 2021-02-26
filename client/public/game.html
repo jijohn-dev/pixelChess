@@ -5,10 +5,10 @@
 	<link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
 </head>
 <body>
-	<div class="main container">
+	<div id="main" class="main container">		
 		<canvas id="gameCanvas" width="800" height="800"></canvas>
 	
-		<div class="chat">			
+		<div id ="chat-region" class="chat">			
 			<div class="chat__main">
 				<div id="messages" class="chat__messages"></div>
 
@@ -25,17 +25,18 @@
 				</div>
 			</div>
 		</div>
+	</div>
 
-		<div class="centered-form" id="username-form-box">
-			<div class="centered-form__box">
-				<h1>Join Game</h1>
-				<form id="username-form">				
-					<input type="text" name="username" placeholder="Display name" required>               						
-					<button>Join</button>
-				</form>
-			</div>
-		</div>  
-	</div>	
+	<div class="centered-form" id="username-form-box">
+		<div class="centered-form__box">
+			<h1>Join Game</h1>
+			<form id="username-form">				
+				<input type="text" name="username" placeholder="Display name" required>               						
+				<button>Join</button>
+			</form>
+		</div>
+	</div>  
+		
     
     <script src="/socket.io/socket.io.js"></script>
     <script src="/bundle.js"></script>   
