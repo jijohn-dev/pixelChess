@@ -1,7 +1,7 @@
 import { state } from './gameState'
 
 // draw the board
-function drawBoard() {  
+const drawBoard = () => {  
     state.ctx.fillStyle = '#7C5CBF';
     state.ctx.fillRect(0, 0, state.canvas.width, state.canvas.height);
 
@@ -17,7 +17,7 @@ function drawBoard() {
 }
 
 // sx, sy, dx, dy
-function drawPiece(x, y, i, j, dx, dy) {
+const drawPiece = (x, y, i, j, dx, dy) => {
     let size = state.size
     // default to 0 if offset not set
     if (!dx) {
@@ -65,9 +65,18 @@ const idxToSquare = (x, y) => {
     return file + rank
 }
 
+// fade the board
+const fadeBoard = () => {
+    state.ctx.globalAlpha = 0.8
+    state.ctx.fillstyle = 'black'
+    state.ctx.fillRect(0, 0, 800, 800)
+    state.ctx.globalAlpha = 1.0
+}
+
 export {
     drawBoard,
     drawPieces,
     drawPromotionMenu,
-    idxToSquare
+    idxToSquare,
+    fadeBoard
 }

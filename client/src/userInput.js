@@ -1,6 +1,8 @@
 import { state } from './gameState'
 import { socket } from './connection'
-import { drawBoard, drawPieces, drawPromotionMenu, idxToSquare } from './util'
+import { drawBoard, drawPieces, drawPromotionMenu, fadeBoard, idxToSquare } from './util'
+import sounds from './sounds'
+import { addRematchButton } from './chat'
 
 const handleMouseDown = e => {  
     if (state.status === 'inactive') return
@@ -77,12 +79,21 @@ const handleMouseUp = e => {
             const move = state.promotionMove + menuLocations[squareY]
             state.promotionMenuOpen = false
 
-            state.game.play(move)                                    
-            console.log(move)
-            // send move to server            
-            socket.emit("move", move)
+            // play move
+            execute(move)
+
+            // update screen
             drawBoard()
             drawPieces()
+
+            // check if game is over
+            if (state.game.checkmate || state.game.stalemate) {
+                state.status = 'inactive'
+                sounds.gameEnd.play()
+                fadeBoard()
+                addRematchButton
+            }
+
             return
         }
         else {
@@ -127,8 +138,13 @@ const handleMouseUp = e => {
             legal = state.game.legal(move)
             if (!legal) {
                 console.log("illegal move", move)     
-                console.log(state.game.pieces)           
+                // console.log(state.game.pieces)           
                 moveMade = false
+
+                // play sound if king in check
+                if (state.game.check) {
+                    sounds.badMove.play()
+                }
             }   
             else {
                 // promotion menu
@@ -160,11 +176,7 @@ const handleMouseUp = e => {
 
         // update and redraw                          
         if (moveMade) {            
-            state.game.play(move)                                    
-            console.log(move)
-            
-            // send move to server            
-            socket.emit("move", move)
+            execute(move)
             
             // remove draw offer if present
             const drawOffer = document.getElementById('draw-offer')
@@ -173,10 +185,20 @@ const handleMouseUp = e => {
                 document.getElementById('yes').remove()
                 document.getElementById('no').remove()
             }
-        }   
+        }  
         
+        // redraw
         drawBoard()
-        drawPieces()
+        drawPieces()   
+        
+        // check if game is over
+        if (state.game.checkmate || state.game.stalemate) {
+            state.status = 'inactive'
+            sounds.gameEnd.play()
+            fadeBoard()
+            addRematchButton()
+        }
+        
     }
 }
 
@@ -208,6 +230,25 @@ const handleMouseMove = e => {
         drawBoard()
         drawPieces()
     }
+}
+
+const execute = move => {
+    state.game.play(move)                                    
+    console.log(move)
+
+    // play sound    
+    if (state.game.capture) {
+        sounds.capture.play()
+    }
+    else if (state.game.check) {
+        sounds.check.play()
+    }
+    else {
+        sounds.movePiece.play()
+    }    
+    
+    // send move to server            
+    socket.emit("move", move)
 }
 
 export { handleMouseDown, handleMouseUp, handleMouseMove }

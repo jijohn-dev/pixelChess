@@ -7,7 +7,7 @@
     "start": "node ./server/server.js",
     "dev-server": "nodemon ./server/server.js",
     "build": "webpack",
-    "update-chessJS": "cp -f ../chessJS/Chess.js ../chessJS/attacking.js ../chessJS/move.js ../chessJS/utils.js ./modules/chessJS"
+    "update-chessJS": "cp -f ../chessJS/Chess.js ../chessJS/attacking.js ../chessJS/move.js ../chessJS/utils.js ../chessJS/mate.js ./modules/chessJS"
   },
   "author": "",
   "license": "ISC",

@@ -1,4 +1,5 @@
-const { checkmate, stalemate } = require("./attacking")
+const { checkmate, kingInCheck } = require("./attacking")
+const { stalemate } = require("./mate")
 const { legalMove, makeMove } = require("./move")
 const { initializePieces, loadBoard } = require("./utils")
 
@@ -10,11 +11,24 @@ class Chess {
 		this.toMove = "white"
 		this.stalemate = false
 		this.checkmate = false
+		this.capture = false
+		this.check = false
+		this.numPieces = 32
 
 		initializePieces(this.pieces)
 	}
 
 	legal(move) {
+		if (this.checkmate) {
+			console.log('checkmate')
+			return false
+		}
+		
+		if (this.stalemate) {
+			console.log('stalemate')
+			return false
+		}
+
 		return legalMove(this.pieces, move, this.lastMove)
 	}
 
@@ -26,17 +40,22 @@ class Chess {
 		// checkmate or stalemate?
 		const king = this.pieces.find(p => p.name === "king" && p.color !== this.toMove)
 		
-		if (checkmate(this.pieces, king)) {			
+		if (checkmate(this.pieces, king, this.lastMove)) {			
 			this.checkmate = true
 			this.winner = this.toMove
 		}
-		else if (stalemate(this.pieces, king)) {
+		else if (stalemate(this.pieces, king, this.lastMove)) {
 			this.stalemate = true
 		}
 		else {
 			// update to move
 			this.toMove = this.toMove === "white" ? "black" : "white"
 		}
+
+		// check or capture on last move?
+		this.check = kingInCheck(this.pieces, king.boardX, king.boardY)
+		this.capture = this.pieces.length !== this.numPieces
+		this.numPieces = this.pieces.length
 	}
 
 	// print the board to the console
@@ -68,14 +87,16 @@ class Chess {
 		this.pieces = loadBoard(board)
 		this.toMove = toMove
 		this.lastMove = lastMove
+		this.stalemate = false
+		this.checkmate = false
 
 		// check for mate
-		const king = this.pieces.find(p => p.name === "king" && p.color !== this.toMove)
+		const king = this.pieces.find(p => p.name === "king" && p.color === this.toMove)
 		if (checkmate(this.pieces, king)) {			
 			this.checkmate = true
 			this.winner = this.toMove
 		}
-		else if (stalemate(this.pieces, king)) {
+		else if (stalemate(this.pieces, king, lastMove)) {			
 			this.stalemate = true
 		}
 	}

@@ -47,17 +47,6 @@ const isAttacking = (pieces, p, x, y) => {
     }
 }
 
-const stalemate = (pieces, king) => {
-    if (!kingInCheck, king.boardX, king.boardY) {
-        // does the king have a legal move?
-        if (kingCanMove(pieces, king.boardX, king.boardY)) {
-            return false
-        }
-        // TODO: is there a legal move for this color?
-    }
-    return false
-}
-
 // is king checkmated?
 const checkmate = (pieces, king) => {    
     // console.log('checkmate?')
@@ -218,9 +207,6 @@ const kingCanMove = (pieces, x, y) => {
 const safeSquare = (pieces, color, x, y) => {
     let safe = true
 	pieces.forEach(p => {        
-        if ((p.name === "bishop" || p.name === "queen") && p.color !== color) {
-            // console.log(`is ${p.color} ${p.name} at ${p.boardX} ${p.boardY} attacking ${color} king at ${x} ${y}?`)
-        }
 		if (p.color !== color && isAttacking(pieces, p, x, y)) {
             // console.log("not safe")
 			safe = false
@@ -270,7 +256,7 @@ const pathClear = (pieces, x, y, targetX, targetY) => {
 module.exports = {
     pathClear,
     kingInCheck,
+    kingCanMove,
     checkmate,
-    stalemate,
     safeSquare
 }

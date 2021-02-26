@@ -83,7 +83,7 @@ io.on('connection', (socket) => {
 			// detect checkmate or stalemate			
 			if (game.state.checkmate) {
 				console.log('checkmate')
-				socket.emit('message', `${game.state.toMove} won by checkmate`)
+				io.to(user.room).emit('message', `${game.state.toMove} won by checkmate`)
 			}						
 
 			// send move to other client

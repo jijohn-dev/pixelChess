@@ -20,7 +20,7 @@ const makeMove = (pieces, move) => {
 
     // promotion (f7f8=q)
     const backRank = piece.color === "white" ? 0 : 7
-    if (targetY === backRank) {
+    if (piece.name === "pawn" && targetY === backRank) {
         piece.name = charToName(move[5])
     }
 
@@ -44,6 +44,11 @@ const legalMove = (pieces, move, lastMove) => {
     // parse move notation
     const { pieceX, pieceY, targetX, targetY } = parseMove(move)
 
+    // same square
+    if (pieceX === targetX && pieceY === targetY) {
+        return false
+    }
+
     // get piece
     const piece = pieces.find(p => p.boardX === pieceX && p.boardY === pieceY)
 
@@ -55,8 +60,14 @@ const legalMove = (pieces, move, lastMove) => {
     // check if target is occupied
     let occupied = false
     pieces.forEach(p => {
-        if (p.color === piece.color && p.boardX === targetX && p.boardY === targetY) {            
-            occupied = true
+        if (p.boardX === targetX && p.boardY === targetY) {    
+            if (p.color === piece.color) {
+                occupied = true
+            }        
+            // pawns are blocked from moving forward by enemy pieces
+            if (piece.name === 'pawn' && pieceX - targetX === 0) {
+                occupied = true
+            }
         }
     })
 
@@ -75,7 +86,6 @@ const legalMove = (pieces, move, lastMove) => {
 
     // check if capture occurs
     const capturedPiece = pieces.find(p => p.boardX === targetX && p.boardY === targetY)
-    // TODO: en passant capture
 
     // move piece
     piece.boardX = targetX
@@ -91,7 +101,7 @@ const legalMove = (pieces, move, lastMove) => {
         }
     })
 
-    // TODO: hide captured piece if capture occurs
+    // hide captured piece if capture occurs
     if (capturedPiece) {
         capturedPiece.delete = true
     }
@@ -102,6 +112,12 @@ const legalMove = (pieces, move, lastMove) => {
     piece.boardY = lastY
     if (capturedPiece) {
         capturedPiece.delete = false
+        // reset en passant simulated capture
+        if (capturedPiece.enPassant) {
+            const step = piece.color === 'white' ? 1 : -1
+            capturedPiece.boardY += step
+            capturedPiece.enPassant = false
+        }
     }
     
     if (check) {
@@ -125,12 +141,13 @@ function canMove(pieces, piece, targetX, targetY, move, lastMove) {
     
     if (piece.name === "pawn") {
         const step = piece.color === "white" ? -1 : 1 
+        const pawnStart = piece.color === "white" ? 6 : 1
         // normal move      
         if (targetY === piece.boardY + step && targetX === piece.boardX) {            
             return true
         }
         // 2 squares on first move
-        if (targetY === piece.boardY + 2*step && targetX === piece.boardX && !piece.hasMoved) {
+        if (targetY === piece.boardY + 2*step && targetX === piece.boardX && piece.boardY === pawnStart) {
             return true
         }
         // capture
@@ -163,14 +180,15 @@ function canMove(pieces, piece, targetX, targetY, move, lastMove) {
                     ) {
                         // move enemy pawn back 1 square to simulate normal capture
                         targetPawn.boardY += step
+                        targetPawn.enPassant = true
                         capture = true                        
                     }          
                     else {
-                        console.log("enemy pawn did not move 2 squares on previous move")
+                        // console.log("enemy pawn did not move 2 squares on previous move")
                     }          
                 }    
                 else {
-                    console.log("no enemy pawn on en passant square")
+                    // console.log("no enemy pawn on en passant square")
                 }                        
             }
             return capture

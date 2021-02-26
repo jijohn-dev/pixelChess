@@ -31,4 +31,15 @@ socket.on('message', message => {
     $messages.insertAdjacentHTML('beforeend', html)
 })
 
-export { $messages }
+const addRematchButton = () => {
+    const html = '<button id="rematch">Rematch</button>'
+    $messages.insertAdjacentHTML('beforeend', html)
+    document.getElementById('rematch').addEventListener('click', () => {
+        const sentMsg = '<p>rematch requested</p>'
+        $messages.insertAdjacentHTML('beforeend', sentMsg)
+        socket.emit('offer-rematch')
+        document.getElementById('rematch').remove()
+    })
+}
+
+export { $messages, addRematchButton }

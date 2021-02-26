@@ -1,8 +1,9 @@
 import { state } from './gameState'
 import { socket } from './connection'
-import { $messages } from './chat'
+import { $messages, addRematchButton } from './chat'
 import { handleMouseDown, handleMouseUp, handleMouseMove } from './userInput'
-import { drawBoard, drawPieces } from './util'
+import { drawBoard, drawPieces, fadeBoard } from './util'
+import sounds from './sounds'
 
 const { Chess } = require('../../modules/chessJS/Chess')
 
@@ -23,11 +24,11 @@ if (query.gameId) {
         
         const gameId = query.gameId
         socket.emit('join', { username, gameId }, error => {
-        if (error) {
-            alert(error)
-            location.href = '/'
-        }
-    })
+            if (error) {
+                alert(error)
+                location.href = '/'
+            }
+        })
     })
 }
 else {
@@ -78,6 +79,9 @@ socket.on('joined', gameInfo => {
 })
 
 const startGame = () => {   
+    // play sound
+    sounds.gameStart.play()
+
     state.canvas = document.getElementById('gameCanvas')
     state.ctx = state.canvas.getContext('2d')
 
@@ -108,11 +112,13 @@ const startGame = () => {
 
 // resign button
 document.getElementById('resign').addEventListener('click', () => {
+    if (state.status !== 'active') return
     socket.emit('resign')
 })
 
 // offer draw button
 document.getElementById('offer-draw').addEventListener('click', () => {
+    if (state.status !== 'active') return
     const html = `<p>You offer a draw<p>`
     $messages.insertAdjacentHTML('beforeend', html)
     socket.emit('offer-draw')
@@ -129,9 +135,19 @@ socket.on('move', move => {
     drawBoard()
     drawPieces()
 
-    // detect checkmate    
-    if (state.game.checkmate) {
-        alert("checkmate")        
+    // play sound
+    if (state.game.capture) {
+        sounds.capture.play()
+    }
+    else if (state.game.check) {
+        sounds.check.play()
+    }
+    else {
+        sounds.movePiece.play()
+    }    
+
+    // detect checkmate or stalemate 
+    if (state.game.checkmate || state.game.stalemate) {                
         endGame()
     }
 })
@@ -206,21 +222,10 @@ socket.on('accept-rematch', () => {
 })
 
 const endGame = () => {
+    sounds.gameEnd.play()
+
     state.status = 'inactive'
 
-    // fade board
-    state.ctx.globalAlpha = 0.8
-    state.ctx.fillstyle = 'black'
-    state.ctx.fillRect(0, 0, 800, 800)
-    state.ctx.globalAlpha = 1.0
-
-    // add rematch button
-    const html = '<button id="rematch">Rematch</button>'
-    $messages.insertAdjacentHTML('beforeend', html)
-    document.getElementById('rematch').addEventListener('click', () => {
-        const sentMsg = '<p>rematch requested</p>'
-        $messages.insertAdjacentHTML('beforeend', sentMsg)
-        socket.emit('offer-rematch')
-        document.getElementById('rematch').remove()
-    })
+    fadeBoard()
+    addRematchButton()
 }

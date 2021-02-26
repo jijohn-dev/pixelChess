@@ -16,6 +16,12 @@ const parseMove = move => {
 	return parsed
 }
 
+const coordsToNotation = (x, y) => {
+    const file = String.fromCharCode(x + 97)
+    const rank = 8 - y
+    return file + rank
+}
+
 // return true if a piece is located at x,y
 const isOccupied = (pieces, x, y) => {
     let occupied = false
@@ -106,6 +112,7 @@ const charToName = char => {
 
 module.exports = {
     validSquare,
+    coordsToNotation,
     isOccupied,
     isBlocked,
 	parseMove,
