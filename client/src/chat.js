@@ -24,6 +24,11 @@ $messageForm.addEventListener('submit', e => {
     })
 })
 
+const displayMsg = msg => {
+    const html = `<p>${msg}<p>`
+    $messages.insertAdjacentHTML('beforeend', html)
+}
+
 // display message in chat 
 socket.on('message', message => {
     console.log(message)
@@ -42,4 +47,4 @@ const addRematchButton = () => {
     })
 }
 
-export { $messages, addRematchButton }
+export { $messages, displayMsg, addRematchButton }

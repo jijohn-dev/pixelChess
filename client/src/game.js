@@ -1,6 +1,6 @@
 import { state } from './gameState'
 import { socket } from './connection'
-import { $messages, addRematchButton } from './chat'
+import { $messages, displayMsg, addRematchButton } from './chat'
 import { handleMouseDown, handleMouseUp, handleMouseMove } from './userInput'
 import { drawBoard, drawPieces, fadeBoard } from './util'
 import sounds from './sounds'
@@ -126,8 +126,7 @@ document.getElementById('resign').addEventListener('click', () => {
 // offer draw button
 document.getElementById('offer-draw').addEventListener('click', () => {
     if (state.status !== 'active') return
-    const html = `<p>You offer a draw<p>`
-    $messages.insertAdjacentHTML('beforeend', html)
+    displayMsg('you offer a draw')
     socket.emit('offer-draw')
 })
 
@@ -154,7 +153,13 @@ socket.on('move', move => {
     }    
 
     // detect checkmate or stalemate 
-    if (state.game.checkmate || state.game.stalemate) {                
+    if (state.game.checkmate || state.game.stalemate) {  
+        if (state.game.stalemate) {
+            displayMsg('draw by stalemate')
+        }   
+        if (state.game.checkmate) {
+            displayMsg(`${state.game.winner} wins by checkmate`)
+        }           
         endGame()
     }
 })
@@ -191,8 +196,7 @@ socket.on('offer-draw', color => {
 
 // handle accept draw
 socket.on('accept-draw', () => {    
-    const html = '<p>Draw</p>'
-    $messages.insertAdjacentHTML('beforeend', html)
+    displayMsg('draw by agreement')
     endGame()
 })
 

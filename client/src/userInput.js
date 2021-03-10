@@ -2,7 +2,7 @@ import { state } from './gameState'
 import { socket } from './connection'
 import { drawBoard, drawPieces, drawPromotionMenu, fadeBoard, idxToSquare } from './util'
 import sounds from './sounds'
-import { addRematchButton } from './chat'
+import { displayMsg, addRematchButton } from './chat'
 
 const handleMouseDown = e => {  
     if (state.status === 'inactive') return
@@ -193,6 +193,10 @@ const handleMouseUp = e => {
         // check if game is over
         if (state.game.checkmate || state.game.stalemate) {
             state.status = 'inactive'
+
+            const msg = state.game.checkmate ? `${state.game.winner} wins by checkmate` : 'draw by stalemate'
+            displayMsg(msg)
+
             sounds.gameEnd.play()
             fadeBoard()
             addRematchButton()
