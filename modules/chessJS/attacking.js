@@ -2,10 +2,10 @@ const { validSquare, isOccupied, isBlocked } = require('./utils')
 
 // checks if any enemy pieces are attacking the square x,y
 const kingInCheck = (pieces, x, y) => {
-	// console.log(`is king at ${x} ${y} in check?`)   
 	let color
 	pieces.forEach(p => {
-		if (p.boardX === x && p.boardY === y) {
+        // ignore temporarily deleted captured piece when searching for legal moves
+		if (!p.delete && p.boardX === x && p.boardY === y) {
 			color = p.color
 		}
 	}) 
@@ -15,6 +15,10 @@ const kingInCheck = (pieces, x, y) => {
             check = true
         }
     })
+
+    // console.log(`is ${color} king at ${x} ${y} in check?`)   
+    // console.log(check ? 'yes' : 'no')    
+
     return check
 }
 
