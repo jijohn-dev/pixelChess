@@ -6,9 +6,12 @@ const { kingInCheck, kingCanMove } = require('./attacking')
 const checkmate = (pieces, king, lastMove) => {    
     // console.log('checkmate?')
     if (kingInCheck(pieces, king.boardX, king.boardY)) {
-        if (kingCanMove(pieces, king.boardX, king.boardY)) {
+		// console.log('king in check after ' + lastMove)
+        if (kingCanMove(pieces, king.boardX, king.boardY)) {			
 			return false
 		}
+
+		// console.log('king cannot move')
         
 		// is there a legal move for this color?
         const color = king.color
@@ -24,7 +27,7 @@ const checkmate = (pieces, king, lastMove) => {
 					ranks.forEach(r => {
 						let move = start + f + r						
 						if(legalMove(pieces, move, lastMove)) {
-							// console.log('legal move:' + move)
+							// console.log('legal move: ' + move)
 							legal = true
 						}
 					})
